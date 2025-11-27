@@ -1,3 +1,4 @@
+![Secuirrel](inc/logo_h1.png)
 # Secuirrel - saltstack for SecOps
 
 Tämä projekti sisältää SaltStack-konfiguraation (states), jonka avulla voidaan nopeasti ja toistettavasti pystyttää Kali Linux -asennus CTF (Capture The Flag) -käyttöön. Tavoitteena on vähentää manuaalista työtä ja varmistaa, että kaikilla on johdonmukainen ja toimiva työympäristö.
