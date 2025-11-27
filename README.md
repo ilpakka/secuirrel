@@ -1,106 +1,107 @@
 ![Secuirrel](inc/logo_h1.png)
-# Secuirrel - saltstack for SecOps
+# Secuirrel - Your Personal SecOps Setup with SaltStack
 
-Tämä projekti sisältää SaltStack-konfiguraation (states), jonka avulla voidaan nopeasti ja toistettavasti pystyttää Kali Linux -asennus CTF (Capture The Flag) -käyttöön. Tavoitteena on vähentää manuaalista työtä ja varmistaa, että kaikilla on johdonmukainen ja toimiva työympäristö.
+This project provides a SaltStack configuration (states) to quickly and repeatably set up a Linux workstation. The goal is to automate the installation of tools, applications and configurations involving SecOps or Capture-The-Flag happenings.
 
-Koko konfiguraatio on versiohallinnassa, joten muutoksia on helppo seurata ja palata aiempiin versioihin.
+Since the entire setup is version-controlled, tracking changes and reverting to previous configurations is straightforward.
 
-## Tavoitteet ja Ominaisuudet
+## Goals and Features
 
-Projektin päätavoitteena on luoda joustava ja automatisoitu tapa konfiguroida CTF-koneita.
+The main objective is to create a flexible and automated way to configure any Linux machine to your exact specifications.
 
-*   **🚀 Nopea käyttöönotto:** Uusi, puhdas Kali-kone saadaan käyttövalmiiksi yhdellä komennolla.
-*   **🔁 Toistettavuus:** Jokainen asennus on identtinen, mikä poistaa "toimii minun koneellani" -ongelmat.
-*   **🛠️ Modulaarisuus:** Perustyökalut, käyttäjäkohtaiset työkalut ja monimutkaisemmat asennukset on eroteltu omiin tiedostoihinsa.
-*   **👥 Käyttäjäprofiilit:** Mahdollisuus asentaa eri työkaluja eri käyttäjille (esim. "Henry" ja "Ilja") heidän tarpeidensa mukaan.
-*   **✅ Idempotenssi:** Salt-ajon voi suorittaa useita kertoja peräkkäin. Vain tarvittavat muutokset tehdään - mitään ei hajoa.
-*   **🔧 Keskitetty työkaluhallinta:**
-    TBD
+*   **🚀 Fast Deployment:** Get a new, clean Linux machine configured and ready for work with a single command.
+*   **🔁 Reproducibility:** Every installation is identical, eliminating configuration drift and the "it works on my machine" problem.
+*   **🛠️ Modularity:** Base utilities, complex applications, and user-specific dotfiles are separated into their own manageable state files.
+*   **👥 User Profiles:** Apply different sets of tools and configurations for different users or roles (e.g., `developer`, `sysadmin`) on the same machine.
+*   **✅ Idempotency:** The Salt state can be applied multiple times without breaking anything; only necessary changes are made.
+*   **🔧 Centralized Management:** Keep the configuration for all your tools, packages, and dotfiles in one central repository.
 
-## Projektin Rakenne
+## Project Structure
 
 ```
-ctf-kali-salt/
+secuirrel/
 ├── salt/
-│   ├── top.sls             # Pääohjaustiedosto, määrittää mitä ajetaan
-│   └── ctf_box/
-│       ├── init.sls        # Orkestroi kaikki ctf_box-tilat (states)
-│       ├── tools.sls       # Perustyökalut (apt)
-│       ├── binwalk.sls     # Binwalk v2 & v3 asennus
-│       ├── ghidra.sls      # Ghidran asennus
-│       └── users/          # Käyttäjäkohtaiset profiilit
-│           ├── henry.sls
-│           └── ilja.sls
+│   ├── top.sls                 # The main control file, determines which states to run
+│   └── workstation/
+│       ├── init.sls            # Orchestrates all workstation states
+│       ├── base.sls            # Base packages and utilities (installed via package manager)
+│       ├── custom_apps.sls     # Installation for custom or third-party applications
+│       └── users/              # User-specific profiles and dotfiles
+│           ├── user_a.sls
+│           └── user_b.sls
 └── README.md
 ```
 
-## Käyttöönotto
+## Getting Started
 
-Nämä ohjeet on tarkoitettu ajettavaksi suoraan kohdekoneella (masterless-tilassa).
+These instructions are intended to be run directly on the target machine (in a masterless configuration).
 
-### 1. Vaatimukset
+### 1. Prerequisites
 
-*   Puhdas Kali Linux -asennus.
-*   `git` ja `salt-minion` asennettuna.
+*   A Linux distribution (e.g., Arch, Debian, Ubuntu, Fedora).
+*   `git` and `salt-minion` installed.
 
-Voit asentaa tarvittavat paketit komennolla:
+For **Debian/Ubuntu-based systems**, you can install the prerequisites with:
 ```bash
 sudo apt update
 sudo apt install -y git salt-minion
 ```
 
-### 2. Projektin kloonaus
+### 2. Clone the Repository
 
-Kloonaa tämä repositorio koneellesi:
+Clone this repository to your machine:
 ```bash
-git clone <sinun-git-repo-osoite>
-cd ctf-kali-salt
+git clone https://github.com/ilpakka/secuirrel.git
+cd secuirrel
 ```
 
-### 3. Konfiguraation ajaminen
+### 3. Apply the Configuration
 
-Siirry projektin juurihakemistoon (`ctf-kali-salt/`) ja suorita `salt-call`.
+Navigate to the project's root directory (`secuirrel/`) and execute `salt-call`.
 
-#### A) Vain perusasennus
+#### A) Base Installation Only
 
-Tämä asentaa kaikki `tools.sls`, `binwalk.sls` ja `ghidra.sls` -tiedostoissa määritellyt asiat, mutta ei käyttäjäkohtaisia työkaluja.
-
+This installs all common tools and system-wide configurations defined in the base states, but excludes any user-specific settings.
 ```bash
 sudo salt-call --local --file-root=./salt state.apply
 ```
 
-#### B) Perusasennus + käyttäjän työkalut
+#### B) Base Installation + User Profile
 
-Tämä asentaa peruspaketin lisäksi `users/käyttäjä.sls`-tiedostossa määritellyt työkalut.
-
+This applies the base configuration and additionally deploys the settings for a specific user profile (e.g., installing their preferred tools and dotfiles).
 ```bash
-sudo salt-call --local --file-root=./salt state.apply pillar='{"user_profile": "käyttäjä"}'
+# Replace <PROFILE_NAME> with your desired user profile (e.g., 'user_a')
+sudo salt-call --local --file-root=./salt state.apply pillar='{"user_profile": "<PROFILE_NAME>"}'
 ```
-
 ---
 
-## Roadmap & Toteutuksen Tilanne (Checklist)
+## Roadmap & Current Status (Checklist)
+- [x] **Basic Salt Structure:** A modular structure with `top.sls` and `init.sls` for easy management.
+- [ ] **Core Packages:** Installation of common utilities (e.g., `htop`, `vim`, `curl`, `git`) via the system package manager.
+- [ ] **Custom Software Installation:** Logic to download, extract, and install applications from source archives or AppImages.
+- [x] **User Profiles:** A flexible system to apply specific configurations based on a user profile passed via `pillar` data.
+- [ ] **Dotfiles Management:** Automatically manage and deploy personal configuration files (e.g., `.zshrc`, `.vimrc`, `.tmux.conf`).
+- [x] **Install from Git:** Support for cloning software or configurations directly from Git repositories.
+- [ ] **Secrets Management:** A secure way to handle sensitive data like API keys (e.g., using Salt's GPG renderer). TBD
+- [ ] **Support matrix?** Mac os with brew? Ansible? TBD
 
-- [x] **Salt-perusrakenne:** Modulaarinen rakenne `top.sls`- ja `init.sls`-tiedostoilla.
-- [ ] **Perustyökalut:** Yleisten työkalujen (nmap, gobuster, seclists, jne.) asennus `apt`:lla.
-- [ ] **Binwalk v2 & v3:** Kaksi versiota asennettu rinnakkain omiin virtuaaliympäristöihinsä (`binwalk2` & `binwalk3`).
-- [ ] **Ghidra:** Uusimman version automaattinen lataus, purku ja asennus.
-- [ ] **Käyttäjäprofiilit:** Joustava systeemi esun Henryn ja Iljan työkalulistojen asentaminen saltin `pillar`-datan avulla.
-- [ ] **Dotfiles-hallinta:** Omien konfiguraatiotiedostojen (esim. `.zshrc`, `.vimrc`, `.tmux.conf`) automaattinen kopiointi käyttäjän kotihakemistoon.
-- [ ] **Työkalujen asennus Gitistä:** Tuki työkalujen kloonaamiselle suoraan Git-repositorioista (esim. `/opt`-hakemistoon).
-- [ ] **Salaisuuksien hallinta (Secrets Management):** Tapa hallita turvallisesti API-avaimia tai lisenssejä (esim. Saltin GPG-renderöijällä).
+## Extending the Configuration
 
-## Laajentaminen
+This project is designed to be easily extensible. See salt documentation for extended help.
 
-Projektia on helppo laajentaa.
+*   **To add a new system-wide package:**
+    Add the package name to the list in `salt/workstation/base.sls`.
 
-*   **Lisää yleinen työkalu:** Lisää paketin nimi `pkgs`-listaan tiedostossa `salt/ctf_box/tools.sls`.
-*   **Lisää uusi käyttäjä ("Anna"):**
-    1.  Luo uusi tiedosto `salt/ctf_box/users/anna.sls`.
-    2.  Määrittele Annan työkalut tiedostoon samaan tapaan kuin Henryllä tai Iljalla.
-    3.  Lisää `salt/ctf_box/init.sls`-tiedostoon uusi ehto:
+*   **To add a new user profile (e.g., "carlos"):**
+    1.  Create a new file: `salt/workstation/users/carlos.sls`.
+    2.  Define the states for the new user in the file (e.g., packages to install, dotfiles to manage).
+    3.  Add the new profile to the logic in `salt/workstation/init.sls`:
         ```yaml
-        {% elif user == 'anna' %}
+        {% elif user == 'carlos' %}
         include:
-          - ctf_box.users.anna
+          - workstation.users.carlos
         ```
+        
+## Links
+Salt documentation
+https://docs.saltproject.io/en/latest/contents.html
