@@ -3,3 +3,4 @@ ctf_cracking_tools:
     - pkgs:
       - john
       - hashcat
+      - hydra

@@ -9,3 +9,7 @@ ctf_base_tools:
       - python3-pip
       - python3-venv      # TÄRKEÄ: Pythonin virtuaaliympäristöille
       - cmake
+      - curl
+      - wget
+      - tcpdump
+      - ncat

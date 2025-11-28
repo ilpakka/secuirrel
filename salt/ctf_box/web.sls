@@ -4,3 +4,6 @@ ctf_web_tools:
       - nmap
       - gobuster
       - seclists
+      - nikto
+      - sqlmap
+      - ffuf

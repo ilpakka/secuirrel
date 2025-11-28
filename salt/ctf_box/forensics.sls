@@ -3,3 +3,5 @@ ctf_forensics_tools:
     - pkgs:
       - steghide
       - volatility
+      - exiftool
+      - ffmpeg
