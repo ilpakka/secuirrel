@@ -1,4 +1,6 @@
 ![Secuirrel](inc/logo_h1.png)
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) ![Salt](https://img.shields.io/badge/Miniprojekti-h6-red) ![By](https://img.shields.io/badge/creatöörit-ilpakka_and_hneryi-orange)
 # Secuirrel - Your Personal SecOps Setup with SaltStack
 
 This project provides a SaltStack configuration (states) to quickly and repeatably set up a Linux workstation. The goal is to automate the installation of tools, applications and configurations involving SecOps or Capture-The-Flag happenings.
