@@ -32,7 +32,7 @@ binwalk2_symlink:
   virtualenv.managed:
     - python: python3
     - require:
-      - pkg: base_ctf_tools
+      - pkg: ctf_base_tools
 
 install_binwalk3:
   pip.installed:
