@@ -1,0 +1,3 @@
+base:
+  '*':
+    - ctf_box
