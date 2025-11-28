@@ -1,4 +1,4 @@
-base_ctf_tools:
+ctf_base_tools:
   pkg.installed:
     - pkgs:
       - git
@@ -9,14 +9,3 @@ base_ctf_tools:
       - python3-pip
       - python3-venv      # TÄRKEÄ: Pythonin virtuaaliympäristöille
       - cmake
-      # binwalkia varten
-      - libunrar-dev
-      - libsasquatch-dev
-      # Muita tärkeitä tbd (jos muu linux?)
-      - seclists
-      - nmap
-      - gobuster
-      - john
-      - hashcat
-      - steghide
-      - foremost
