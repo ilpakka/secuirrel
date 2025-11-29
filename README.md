@@ -1,109 +1,153 @@
 ![Secuirrel](inc/logo_h1.png)
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) ![Salt](https://img.shields.io/badge/Miniprojekti-h6-red) ![By](https://img.shields.io/badge/creatöörit-ilpakka_and_hneryi-black)
-# Secuirrel - Your Personal SecOps Setup with SaltStack
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) ![Salt](https://img.shields.io/badge/Miniprojekti-h6-red) ![By](https://img.shields.io/badge/creators-ilpakka_and_hneryi-black)
 
-This project provides a SaltStack configuration (states) to quickly and repeatably set up a Linux workstation. The goal is to automate the installation of tools, applications and configurations involving SecOps or Capture-The-Flag happenings.
+# Secuirrel - Automated CTF SecOps Workstation Setup with SaltStack
+
+This project provides a SaltStack configuration to quickly and repeatably set up Kali/Debian/Ubuntu Linux installations into fully-equipped CTF (Capture The Flag)/SecOps rigs. The goal is to automate the installation of security tools, forensics applications, and exploitation frameworks used in CTF competitions and security research.
 
 Since the entire setup is version-controlled, tracking changes and reverting to previous configurations is straightforward.
 
 ## Goals and Features
 
-The main objective is to create a flexible and automated way to configure any Linux machine to your exact specifications.
+The main objective is to create a flexible and automated way to configure CTF workstations with specialized toolsets.
 
-*   **🚀 Fast Deployment:** Get a new, clean Linux machine configured and ready for work with a single command.
+*   **🚀 Fast Deployment:** Transform a clean Linux installation into a CTF-ready machine with a single command.
 *   **🔁 Reproducibility:** Every installation is identical, eliminating configuration drift and the "it works on my machine" problem.
-*   **🛠️ Modularity:** Base utilities, complex applications, and user-specific dotfiles are separated into their own manageable state files.
-*   **👥 User Profiles:** Apply different sets of tools and configurations for different users or roles (e.g., `developer`, `sysadmin`) on the same machine.
-*   **✅ Idempotency:** The Salt state can be applied multiple times without breaking anything; only necessary changes are made.
-*   **🔧 Centralized Management:** Keep the configuration for all your tools, packages, and dotfiles in one central repository.
+*   **🛠️ Modularity:** Base utilities, specialized tools, and user-specific configurations are separated into manageable state files organized by CTF category.
+*   **👥 User Profiles:** Apply different sets of tools for different users or specializations (e.g., web exploitation, binary exploitation, forensics).
+*   **✅ Idempotency:** Salt states can be applied multiple times safely; only necessary changes are made.
+*   **🔧 Centralized Management:** Keep all tool configurations, package definitions, and setup scripts in one Git repository.
 
 ## Project Structure
 
 ```
-secuirrel/
-├── salt/
-│   ├── top.sls                 # The main control file, determines which states to run
-│   └── workstation/
-│       ├── init.sls            # Orchestrates all workstation states
-│       ├── base.sls            # Base packages and utilities (installed via package manager)
-│       ├── custom_apps.sls     # Installation for custom or third-party applications
-│       └── users/              # User-specific profiles and dotfiles
-│           ├── user_a.sls
-│           └── user_b.sls
-└── README.md
+salt/
+├── top.sls                 # Master orchestration file
+└── ctf_box/
+    ├── init.sls            # Main orchestrator with pillar-based logic
+    ├── tools.sls           # Universal base tools (vim, tmux, git, etc.)
+    │
+    ├── cracking/           # Password cracking tools
+    │   ├── cracking.sls
+    │   └── init.sls
+    │
+    ├── forensics/          # Forensics & reverse engineering tools
+    │   ├── binwalk.sls     # Binwalk v2 (apt) & v3 (cargo)
+    │   ├── forensics.sls
+    │   └── init.sls
+    │
+    ├── reverse/            # Reverse engineering & binary analysis
+    │   ├── ghidra.sls      # NSA Ghidra + JDK 21
+    │   ├── init.sls
+    │   └── pwndbg.sls      # GDB plugin with official installer
+    │
+    ├── web/                # Web exploitation tools
+    │   ├── init.sls
+    │   └── web.sls
+    │
+    └── users/              # User-specific profiles
+        └── user.sls        # Example user profile
 ```
 
-## Getting Started
+## Installation & Usage
 
-These instructions are intended to be run directly on the target machine (in a masterless configuration).
+### Prerequisites
 
-### 1. Prerequisites
+*   A clean installation of a Debian-based Linux distribution (e.g., Debian, Kali, Ubuntu) [11].
+*   Salt configured for either master-minion or masterless mode [11].
+*   Git installed on the system [11].
 
-*   A Linux distribution (e.g., Arch, Debian, Ubuntu, Fedora).
-*   `git` and `salt-minion` installed.
+### Quick Start (Masterless)
 
-For **Debian/Ubuntu-based systems**, you can install the prerequisites with:
 ```bash
-sudo apt update
-sudo apt install -y git salt-minion
-```
-
-### 2. Clone the Repository
-
-Clone this repository to your machine:
-```bash
+# 1. Clone the repository
 git clone https://github.com/ilpakka/secuirrel.git
 cd secuirrel
-```
 
-### 3. Apply the Configuration
+# 2. Install Salt (if not already installed)
+#    Follow the official Salt documentation for your specific OS.
 
-Navigate to the project's root directory (`secuirrel/`) and execute `salt-call`.
-
-#### A) Base Installation Only
-
-This installs all common tools and system-wide configurations defined in the base states, but excludes any user-specific settings.
-```bash
+# 3. Apply the full configuration
 sudo salt-call --local --file-root=./salt state.apply
 ```
 
-#### B) Base Installation + User Profile
+### Master-Minion Setup
 
-This applies the base configuration and additionally deploys the settings for a specific user profile (e.g., installing their preferred tools and dotfiles).
 ```bash
-# Replace <PROFILE_NAME> with your desired user profile (e.g., 'user_a')
-sudo salt-call --local --file-root=./salt state.apply pillar='{"user_profile": "<PROFILE_NAME>"}'
-```
----
+# On the Salt Master
+sudo salt 'your-minion-id' state.apply
 
-## Roadmap & Current Status (Checklist)
-- [x] **Basic Salt Structure:** A modular structure with `top.sls` and `init.sls` for easy management.
-- [ ] **Core Packages:** Installation of common utilities (e.g., `htop`, `vim`, `curl`, `git`) via the system package manager.
-- [ ] **Custom Software Installation:** Logic to download, extract, and install applications from source archives or AppImages.
-- [x] **User Profiles:** A flexible system to apply specific configurations based on a user profile passed via `pillar` data.
-- [ ] **Dotfiles Management:** Automatically manage and deploy personal configuration files (e.g., `.zshrc`, `.vimrc`, `.tmux.conf`).
-- [x] **Install from Git:** Support for cloning software or configurations directly from Git repositories.
-- [ ] **Secrets Management:** A secure way to handle sensitive data like API keys (e.g., using Salt's GPG renderer). TBD
-- [ ] **Support matrix?** Mac os with brew? Ansible? TBD
+# Apply a specific category of tools
+sudo salt 'your-minion-id' state.apply ctf_box.forensics
+
+# Apply with a specific user profile
+sudo salt 'your-minion-id' state.apply pillar='{"user_profile": "henry"}'
+```
+
+## Roadmap & Implementation Status
+
+### ✅ Completed Features
+
+- [x] **Modular Salt Structure:** Category-based organization (`forensics/`, `reverse/`, `web/`, `cracking/`) [10]
+- [x] **Binwalk Dual-Version Support:** v2 via apt (`binwalk2`) and v3 via cargo (`binwalk`) with user-specific installations [7]
+- [x] **Ghidra Installation:** Automated download, extraction, and JDK 21 setup with version management [4]
+- [x] **Pwndbg Official Installation:** GDB plugin installed via official script with multi-user support [3]
+- [x] **User Profile System:** Pillar-based flexible configuration for different user needs [10]
+- [x] **Git-Based Tool Installation:** Support for cloning and building tools from Git repositories [3]
+- [x] **Base Toolkit:** Essential utilities (curl, wget, vim, tmux, git, python3) [5]
+- [x] **Web Exploitation Tools:** nmap, gobuster, sqlmap, ffuf, nikto, seclists [6]
+- [x] **Forensics Tools:** steghide, volatility, exiftool, ffmpeg [8]
+- [x] **Password Cracking Tools:** john, hashcat, hydra [9]
+
+### 🚧 In Progress / Planned future
+
+- [ ] **Moar tools:** Lots still missing.
+- [ ] **Secrets Management:** Secure handling of API keys and licenses (GPG renderer)
+- [ ] **Crypto/Stego Tools:** CyberChef, stegsolve, zsteg
+- [ ] **Network Analysis:** Wireshark plugins, tcpdump configurations
+- [ ] **Custom Scripts and better support:** Collection of CTF helper scripts and foe .zsh support (now only bash)
+- [ ] **Multi-Platform Support:** macOS with Homebrew, Ansible fallback for non-Salt environments
+- [ ] **Container Support:** Docker/Podman images for isolated tool environments
+- [ ] **Automatic Updates:** Scheduled tool version checks and updates
 
 ## Extending the Configuration
 
-This project is designed to be easily extensible. See salt documentation for extended help.
+Adding new tools is straightforward:
 
-*   **To add a new system-wide package:**
-    Add the package name to the list in `salt/workstation/base.sls`.
+1. **Create a new state file** in the appropriate category (e.g., `ctf_box/web/new_tool.sls`)
+2. **Update the category orchestrator** (e.g., `ctf_box/web/web.sls`) to include the new state
+3. **Test the installation** on a minion: `sudo salt 'minion' state.apply ctf_box.web.new_tool`
+4. **Commit changes** to version control
 
-*   **To add a new user profile (e.g., "carlos"):**
-    1.  Create a new file: `salt/workstation/users/carlos.sls`.
-    2.  Define the states for the new user in the file (e.g., packages to install, dotfiles to manage).
-    3.  Add the new profile to the logic in `salt/workstation/init.sls`:
-        ```yaml
-        {% elif user == 'carlos' %}
-        include:
-          - workstation.users.carlos
-        ```
-        
+### Example: Adding a New Tool
+
+```yaml
+# ctf_box/forensics/new_forensics_tool.sls
+install_new_forensics_tool:
+  pkg.installed:
+    - name: awesome-forensics-tool
+```
+
+Then add to `ctf_box/forensics/forensics.sls`:
+```yaml
+include:
+  - ctf_box.forensics.binwalk
+  - ctf_box.forensics.new_forensics_tool  # <-- New line
+```
+
+## Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Test your changes thoroughly
+4. Submit a pull request with a clear description
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.
+
 ## Links
-Salt documentation
-https://docs.saltproject.io/en/latest/contents.html
+
+Salt documentation https://docs.saltproject.io/en/latest/contents.html

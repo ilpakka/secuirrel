@@ -1,15 +1,30 @@
-ctf_base_tools:
+# Base toolkit - most all ready in
+universal_base_tools:
   pkg.installed:
     - pkgs:
-      - git
-      - vim
-      - tmux
-      - curl
-      - build-essential   # Kääntämiseen tarvittavat paketit
-      - python3-pip
-      - python3-venv      # TÄRKEÄ: Pythonin virtuaaliympäristöille
-      - cmake
+      # Connect
       - curl
       - wget
-      - tcpdump
-      - ncat
+      - netcat-traditional
+      - nmap
+      
+      # Edit
+      - vim
+      - nano
+      - grep
+      
+      # Files
+      - unzip
+      - p7zip-full
+      - tar
+      
+      # Git venv
+      - git
+      - build-essential
+      - python3
+      - python3-pip
+      
+      # Henry can't live without tmux and tree
+      - tmux
+      - tree
+      - file

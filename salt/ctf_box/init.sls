@@ -1,36 +1,39 @@
 {# salt/ctf_box/init.sls #}
+{# Main orchestrator for CTF box configuration with pillar-based logic #}
+
 {%- set cfg = pillar.get('ctf_box', {}) %}
 {%- set profile = pillar.get('profile', 'full') %}
 {%- set install = pillar.get('install', {}) %}
 
-# keys
-{%- set binwalk_enabled = install.get('binwalk_tools', True) %}
-{%- set web_enabled = install.get('web_tools', True) %}
+{# Feature flags - default all to True for 'full' profile #}
 {%- set forensics_enabled = install.get('forensics_tools', True) %}
+{%- set reverse_enabled = install.get('reverse_tools', True) %}
+{%- set web_enabled = install.get('web_tools', True) %}
 {%- set cracking_enabled = install.get('cracking_tools', True) %}
+{%- set user_profile = pillar.get('user_profile', none) %}
 
+# Base tools are always installed
 include:
-  - ctf_box.tools	# always True
+  - ctf_box.tools
 
-  {%- if binwalk_enabled and profile in ['full'] %}
-  - ctf_box.binwalk
-  {%- endif %}
-
-  {%- if web_enabled and profile in ['full'] %}
-  - ctf_box.web
-  {%- endif %}
-
-  {%- if forensics_enabled and profile in ['full'] %}
+# Category-based tool installations (controlled by pillar flags)
+{%- if forensics_enabled %}
   - ctf_box.forensics
-  {%- endif %}
+{%- endif %}
 
-  {%- if cracking_enabled and profile in ['full'] %}
+{%- if reverse_enabled %}
+  - ctf_box.reverse
+{%- endif %}
+
+{%- if web_enabled %}
+  - ctf_box.web
+{%- endif %}
+
+{%- if cracking_enabled %}
   - ctf_box.cracking
-  {%- endif %}
+{%- endif %}
 
-# user config
-
-  # {%- if cfg.get('user') %}
-  # - userconfig_later_maybe_maybe
-  # {%- endif %}
-
+# User-specific profiles (optional)
+{%- if user_profile %}
+  - ctf_box.users.{{ user_profile }}
+{%- endif %}
